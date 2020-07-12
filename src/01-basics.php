@@ -12,8 +12,9 @@
  */
 function getMinuteQuarter(int $minute)
 {
-    if ($minute > 60)
+    if ($minute > 60 || $minute < 0) {
         throw new InvalidArgumentException();
+    }
 
     if (0 < $minute && $minute <= 15)
         return "first";
@@ -38,8 +39,9 @@ function getMinuteQuarter(int $minute)
  */
 function isLeapYear(int $year)
 {
-    if ($year < 1900)
+    if ($year < 1900) {
         throw new InvalidArgumentException();
+    }
 
     if (($year % 4) != 0){
         return false;
@@ -67,8 +69,9 @@ function isSumEqual(string $input)
 {
     $inputArray = str_split($input);
 
-    if (count($inputArray) != 6)
+    if (count($inputArray) != 6) {
         throw new InvalidArgumentException();
+    }
 
     $chunks = array_chunk($inputArray, 3);
 

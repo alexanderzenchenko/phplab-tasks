@@ -16,14 +16,18 @@ function getMinuteQuarter(int $minute)
         throw new InvalidArgumentException();
     }
 
-    if (0 < $minute && $minute <= 15)
+    if (0 < $minute && $minute <= 15) {
         return "first";
-    if (15 < $minute && $minute <= 30)
+    }
+    if (15 < $minute && $minute <= 30) {
         return "second";
-    if (30 < $minute && $minute <= 45)
+    }
+    if (30 < $minute && $minute <= 45) {
         return "third";
-    if ((45 < $minute && $minute < 60) || $minute === 0)
+    }
+    if ((45 < $minute && $minute < 60) || $minute === 0) {
         return "fourth";
+    }
 }
 
 /**

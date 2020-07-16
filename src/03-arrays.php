@@ -35,16 +35,17 @@ function repeatArrayValues(array $input)
  */
 function getUniqueValue(array $input)
 {
-    $count = count($input);
-
-    if ($count === 0) {
+    if (count($input) === 0) {
         return 0;
     }
 
     $countValues = array_count_values($input);
-    asort($countValues);
 
-    return $countValues[array_key_first($countValues)] == 1 ? array_key_first($countValues) : 0 ;
+    $unique = array_filter($countValues, function($item) {
+        return $item === 1;
+    });
+
+    return count($unique) === 0 ? 0 : min(array_keys($unique));
 }
 
 /**

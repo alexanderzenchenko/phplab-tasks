@@ -35,7 +35,9 @@ function sayHelloArgument($arg)
  */
 function sayHelloArgumentWrapper($arg)
 {
-    // put your code here
+    if (!is_int($arg) && !is_bool($arg) && !is_string($arg)) {
+        throw new InvalidArgumentException('$arg must be number, string or bool');
+    }
 
     return sayHelloArgument($arg);
 }
@@ -69,5 +71,17 @@ function countArguments()
  */
 function countArgumentsWrapper()
 {
-    // put your code here
+    if (func_num_args() === 0) {
+        throw new InvalidArgumentException('No arguments passed');
+    }
+
+    $args = func_get_args();
+
+    array_map(function ($item) {
+        if (!is_string($item)) {
+            throw new InvalidArgumentException('All arguments must be a strings');
+        }
+    }, $args);
+
+    countArguments(...$args);
 }

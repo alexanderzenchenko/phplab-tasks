@@ -2,7 +2,6 @@
 require_once './functions.php';
 
 $airports = require './airports.php';
-
 // Filtering
 /**
  * Here you need to check $_GET request if it has any filtering
@@ -10,12 +9,15 @@ $airports = require './airports.php';
  * (see Filtering tasks 1 and 2 below)
  */
 
+checkFilters($airports);
+
 // Sorting
 /**
  * Here you need to check $_GET request if it has sorting key
  * and apply sorting
  * (see Sorting task below)
  */
+sortAirports($airports);
 
 // Pagination
 /**
@@ -23,6 +25,10 @@ $airports = require './airports.php';
  * and apply pagination logic
  * (see Pagination task below)
  */
+$pages = getPages($airports);
+$currentPage = getCurrentPage();
+pagination($airports);
+
 ?>
 <!doctype html>
 <html lang="en">
@@ -53,7 +59,7 @@ $airports = require './airports.php';
         Filter by first letter:
 
         <?php foreach (getUniqueFirstLetters(require './airports.php') as $letter): ?>
-            <a href="#"><?= $letter ?></a>
+            <a href="<?= getUri('filter_by_first_letter', $letter); ?>"><?= $letter ?></a>
         <?php endforeach; ?>
 
         <a href="/" class="float-right">Reset all filters</a>
@@ -72,10 +78,10 @@ $airports = require './airports.php';
     <table class="table">
         <thead>
         <tr>
-            <th scope="col"><a href="#">Name</a></th>
-            <th scope="col"><a href="#">Code</a></th>
-            <th scope="col"><a href="#">State</a></th>
-            <th scope="col"><a href="#">City</a></th>
+            <th scope="col"><a href="<?= getUri('sort', 'name') ?>">Name</a></th>
+            <th scope="col"><a href="<?= getUri('sort', 'code') ?>">Code</a></th>
+            <th scope="col"><a href="<?= getUri('sort', 'state') ?>">State</a></th>
+            <th scope="col"><a href="<?= getUri('sort', 'city') ?>">City</a></th>
             <th scope="col">Address</th>
             <th scope="col">Timezone</th>
         </tr>
@@ -92,14 +98,14 @@ $airports = require './airports.php';
                i.e. if you have filter_by_first_letter set you can additionally use filter_by_state
         -->
         <?php foreach ($airports as $airport): ?>
-        <tr>
-            <td><?= $airport['name'] ?></td>
-            <td><?= $airport['code'] ?></td>
-            <td><a href="#"><?= $airport['state'] ?></a></td>
-            <td><?= $airport['city'] ?></td>
-            <td><?= $airport['address'] ?></td>
-            <td><?= $airport['timezone'] ?></td>
-        </tr>
+            <tr>
+                <td><?= $airport['name'] ?></td>
+                <td><?= $airport['code'] ?></td>
+                <td><a href="<?= getUri('filter_by_state', $airport['state']); ?>"><?= $airport['state'] ?></a></td>
+                <td><?= $airport['city'] ?></td>
+                <td><?= $airport['address'] ?></td>
+                <td><?= $airport['timezone'] ?></td>
+            </tr>
         <?php endforeach; ?>
         </tbody>
     </table>
@@ -114,10 +120,14 @@ $airports = require './airports.php';
          - when you apply pagination - all filters and sorting are not reset
     -->
     <nav aria-label="Navigation">
-        <ul class="pagination justify-content-center">
-            <li class="page-item active"><a class="page-link" href="#">1</a></li>
-            <li class="page-item"><a class="page-link" href="#">2</a></li>
-            <li class="page-item"><a class="page-link" href="#">3</a></li>
+        <ul class="pagination justify-content-center flex-wrap">
+            <?php for ($page = 1; $page <= $pages; $page++): ?>
+                <?php if ($page == $currentPage): ?>
+                    <li class="page-item active"><a class="page-link" href="<?= getUri('page', $page) ?>"><?= $page ?></a></li>
+                <?php else: ?>
+                    <li class="page-item"><a class="page-link" href="<?= getUri('page', $page) ?>"><?= $page ?></a></li>
+                <?php endif; ?>
+            <?php endfor; ?>
         </ul>
     </nav>
 

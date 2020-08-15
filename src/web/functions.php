@@ -1,6 +1,4 @@
 <?php
-define('AIRPORTS_PER_PAGE', 5);
-
 /**
  * The $airports variable contains array of arrays of airports (see airports.php)
  * What can be put instead of placeholder so that function returns the unique first letter of each airport name
@@ -23,86 +21,78 @@ function getUniqueFirstLetters(array $airports)
 
     return $letters;
 }
+
 /**
- * Check and apply filters
+ * Filter Airports by first letter
  *
  * @param array $airports
+ * @param $letter
+ * @return array
+ *
  */
-function checkFilters(&$airports)
-{
-    if (key_exists('filter_by_first_letter', $_GET)) {
-        $airports = array_filter($airports, function ($airport) {
-            if ($airport['name'][0] === $_GET['filter_by_first_letter']) {
-                return true;
-            }
+function filterByFirstLetter($airports, $letter) {
+    return array_filter($airports, function ($airport) use ($letter) {
+        if ($airport['name'][0] === $letter) {
+            return true;
+        }
+        return false;
+    });
+}
 
-            return false;
-        });
-    }
-
-    if (key_exists('filter_by_state', $_GET)) {
-        $airports = array_filter($airports, function ($airport) {
-            if ($airport['state'] === $_GET['filter_by_state']) {
-                return true;
-            }
-
-            return false;
-        });
-    }
+/**
+ * Filter Airports by state
+ *
+ * @param array $airports
+ * @param $state
+ *
+ * @return array
+ */
+function filterByState($airports, $state) {
+    return $airports = array_filter($airports, function ($airport) use ($state) {
+        if ($airport['state'] === $state) {
+            return true;
+        }
+        return false;
+    });
 }
 
 /**
  * Sort Airports by sorting key
  *
  * @param array $airports
+ * @param $sortKey
+ *
+ * @return array
  */
-function sortAirports(&$airports)
+function sortAirports($airports, $sortKey)
 {
-    if (key_exists('sort', $_GET)) {
-        $names = array_column($airports, 'name');
-        $codes = array_column($airports, 'code');
-        $states = array_column($airports, 'state');
-        $cities = array_column($airports, 'city');
+    $sortColumn = array_column($airports, $sortKey);
+    array_multisort($sortColumn, SORT_ASC, $airports);
 
-        switch ($_GET['sort']) {
-            case 'name' :
-                array_multisort($names, SORT_ASC, $airports);
-                break;
-            case 'code' :
-                array_multisort($codes, SORT_ASC, $airports);
-                break;
-            case 'state' :
-                array_multisort($states, SORT_ASC, $airports);
-                break;
-            case 'city' :
-                array_multisort($cities, SORT_ASC, $airports);
-                break;
-            default:
-                break;
-        }
-    }
+    return $airports;
 }
 
 /**
  * Slice array of airports
  *
  * @param array $airports
+ * @param int $countPerPage
+ * @param int $currentPage
+ *
+ * @return array
  */
-function pagination(&$airports)
+function pagination($airports, $countPerPage = 5, $currentPage = 1)
 {
-    $from = 0;
-    if (key_exists('page', $_GET)) {
-        $from = ($_GET['page'] - 1) * AIRPORTS_PER_PAGE;
-    }
-
-    $airports = array_slice($airports, $from, AIRPORTS_PER_PAGE);
-
+    $from = ($currentPage - 1) * $countPerPage;
+    return array_slice($airports, $from, $countPerPage);
 }
 
 /**
  * Get count of pages
  *
  * @param array $airports
+ *
+ * @return int
  */
 function getPages($airports)
 {
@@ -110,10 +100,10 @@ function getPages($airports)
     return ceil($count / AIRPORTS_PER_PAGE);
 }
 
-function getCurrentPage()
+function getCurrentPage($get)
 {
-    if (key_exists('page', $_GET)) {
-        return $_GET['page'];
+    if (key_exists('page', $get)) {
+        return $get['page'];
     }
 
     return 1;
@@ -121,29 +111,12 @@ function getCurrentPage()
 
 /**
  * Generate URL based on chosen filters and sorting column
- * @param string $key
- * @param string $value
+ *
+ * @param array $params
+ *
+ * @return string
  */
-function getUri($key, $value)
+function getUri($params)
 {
-    if (trim($key) == '' || trim($value == '')) {
-        return '';
-    }
-
-    if (key_exists('page', $_GET) && $key != 'page') {
-        $_GET['page'] = 1;
-    }
-
-    $uri = '/?';
-
-    $uri .= $key.'='.$value.'&';
-
-    foreach ($_GET as $get_key => $value) {
-        if ($get_key == $key) {
-            continue;
-        }
-        $uri .= $get_key.'='.$value.'&';
-    }
-
-    return trim($uri, '&');
+    return count($params) != 0 ? '/?'.http_build_query(array_merge($_GET, $params)) : '';
 }

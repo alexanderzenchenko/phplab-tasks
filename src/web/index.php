@@ -2,14 +2,22 @@
 require_once './functions.php';
 
 $airports = require './airports.php';
+
+define('AIRPORTS_PER_PAGE', 5);
+
 // Filtering
 /**
  * Here you need to check $_GET request if it has any filtering
  * and apply filtering by First Airport Name Letter and/or Airport State
  * (see Filtering tasks 1 and 2 below)
  */
+if (key_exists('filter_by_first_letter', $_GET)) {
+    $airports = filterByFirstLetter($airports, $_GET['filter_by_first_letter']);
+}
 
-checkFilters($airports);
+if (key_exists('filter_by_state', $_GET)) {
+    $airports = filterByState($airports, $_GET['filter_by_state']);
+}
 
 // Sorting
 /**
@@ -17,7 +25,9 @@ checkFilters($airports);
  * and apply sorting
  * (see Sorting task below)
  */
-sortAirports($airports);
+if (key_exists('sort', $_GET)) {
+    $airports = sortAirports($airports, $_GET['sort']);
+}
 
 // Pagination
 /**
@@ -26,8 +36,8 @@ sortAirports($airports);
  * (see Pagination task below)
  */
 $pages = getPages($airports);
-$currentPage = getCurrentPage();
-pagination($airports);
+$currentPage =  getCurrentPage($_GET);
+$airports = pagination($airports, AIRPORTS_PER_PAGE, $currentPage);
 
 ?>
 <!doctype html>
@@ -59,7 +69,7 @@ pagination($airports);
         Filter by first letter:
 
         <?php foreach (getUniqueFirstLetters(require './airports.php') as $letter): ?>
-            <a href="<?= getUri('filter_by_first_letter', $letter); ?>"><?= $letter ?></a>
+            <a href="<?= getUri(['filter_by_first_letter' => $letter, 'page' => 1]); ?>"><?= $letter ?></a>
         <?php endforeach; ?>
 
         <a href="/" class="float-right">Reset all filters</a>
@@ -78,10 +88,10 @@ pagination($airports);
     <table class="table">
         <thead>
         <tr>
-            <th scope="col"><a href="<?= getUri('sort', 'name') ?>">Name</a></th>
-            <th scope="col"><a href="<?= getUri('sort', 'code') ?>">Code</a></th>
-            <th scope="col"><a href="<?= getUri('sort', 'state') ?>">State</a></th>
-            <th scope="col"><a href="<?= getUri('sort', 'city') ?>">City</a></th>
+            <th scope="col"><a href="<?= getUri(['sort' => 'name']) ?>">Name</a></th>
+            <th scope="col"><a href="<?= getUri(['sort' => 'code']) ?>">Code</a></th>
+            <th scope="col"><a href="<?= getUri(['sort' => 'state']) ?>">State</a></th>
+            <th scope="col"><a href="<?= getUri(['sort' => 'city']) ?>">City</a></th>
             <th scope="col">Address</th>
             <th scope="col">Timezone</th>
         </tr>
@@ -101,7 +111,7 @@ pagination($airports);
             <tr>
                 <td><?= $airport['name'] ?></td>
                 <td><?= $airport['code'] ?></td>
-                <td><a href="<?= getUri('filter_by_state', $airport['state']); ?>"><?= $airport['state'] ?></a></td>
+                <td><a href="<?= getUri(['filter_by_state' => $airport['state'], 'page' => 1]); ?>"><?= $airport['state'] ?></a></td>
                 <td><?= $airport['city'] ?></td>
                 <td><?= $airport['address'] ?></td>
                 <td><?= $airport['timezone'] ?></td>
@@ -123,9 +133,9 @@ pagination($airports);
         <ul class="pagination justify-content-center flex-wrap">
             <?php for ($page = 1; $page <= $pages; $page++): ?>
                 <?php if ($page == $currentPage): ?>
-                    <li class="page-item active"><a class="page-link" href="<?= getUri('page', $page) ?>"><?= $page ?></a></li>
+                    <li class="page-item active"><a class="page-link" href="<?= getUri(['page' => $page]) ?>"><?= $page ?></a></li>
                 <?php else: ?>
-                    <li class="page-item"><a class="page-link" href="<?= getUri('page', $page) ?>"><?= $page ?></a></li>
+                    <li class="page-item"><a class="page-link" href="<?= getUri(['page' => $page]) ?>"><?= $page ?></a></li>
                 <?php endif; ?>
             <?php endfor; ?>
         </ul>
